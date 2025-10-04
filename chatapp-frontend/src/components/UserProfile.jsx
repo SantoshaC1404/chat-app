@@ -29,7 +29,7 @@ const UserProfile = ({ user, media, onLogout }) => {
       <div className="mt-8">
         <button
           onClick={onLogout}
-          className="w-full py-3 bg-[#1da1f2] hover:bg-[#0d8ae6] rounded-full text-white font-semibold cursor-pointer"
+          className="w-full py-3 bg-[#f03740] hover:bg-[#f3547f] rounded-full text-white font-semibold cursor-pointer"
         >
           Logout
         </button>
