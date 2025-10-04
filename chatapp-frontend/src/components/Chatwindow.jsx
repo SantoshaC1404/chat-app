@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { MdAttachFile, MdSend, MdImage } from "react-icons/md";
 import { FiInfo } from "react-icons/fi";
-import { timeAgo } from "../utils/timeAgo";
 import { formatChatDate } from "../utils/dateHelpers";
 
 const ChatWindow = ({

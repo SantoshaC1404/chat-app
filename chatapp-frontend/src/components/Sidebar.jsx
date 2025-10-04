@@ -2,11 +2,13 @@ const Sidebar = ({ conversations, selectedUser, setSelectedUser }) => {
   return (
     <div className="w-80 bg-dark p-4 text-white h-screen overflow-y-auto">
       <h2 className="text-xl font-bold mb-4">Chatapp</h2>
-      <input
+      {/* Search Placeholder */}
+      {/* <input
         type="text"
         placeholder="Search here.."
         className="w-full p-2 mb-4 rounded bg-gray-700 focus:outline-none"
-      />
+      /> */}
+
       <div className="space-y-2">
         {conversations.map((conv, index) => (
           <div

@@ -22,4 +22,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOrigins("http://localhost:5173") // allow all origins
                 .withSockJS(); // enable SockJS fallback options
     }
+
 }
