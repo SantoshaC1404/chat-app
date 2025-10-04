@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { MdAttachFile, MdSend, MdImage } from "react-icons/md";
 import { FiInfo } from "react-icons/fi";
 import { timeAgo } from "../utils/timeAgo";
+import { formatChatDate } from "../utils/dateHelpers";
 
 const ChatWindow = ({
   messages,
@@ -19,6 +20,13 @@ const ChatWindow = ({
       behavior: "smooth",
     });
   }, [messages]);
+
+  const groupedMessages = messages.reduce((acc, message) => {
+    const dateKey = formatChatDate(message.timeStamp);
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(message);
+    return acc;
+  }, {});
 
   return (
     <main className="flex-1 h-screen flex flex-col bg-[#f6f8fb]">
@@ -46,91 +54,105 @@ const ChatWindow = ({
         </div>
 
         {/* thin divider line under header */}
-        <div className="mt-4 border-t border-gray-100" />
+        <div className="mt-4 border-t border-gray-300" />
       </div>
 
       {/* Messages */}
       <div ref={chatBoxRef} className="flex-1 px-8 py-6 overflow-y-auto">
         <div className="max-w-2xl mx-auto space-y-6">
-          {messages.map((msg, idx) => {
-            const imageUrl =
-              msg.image ||
-              msg.imageUrl ||
-              (typeof msg.content === "string" &&
-              /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))|(data:image\/)/i.test(
-                msg.content
-              )
-                ? msg.content
-                : null);
-            const hasImage = Boolean(imageUrl);
-
-            return (
-              <div
-                key={idx}
-                className={`flex items-end ${
-                  msg.sender === currentUser ? "justify-end" : "justify-start"
-                }`}
-              >
-                {/* incoming: avatar on left with time below */}
-                {msg.sender !== currentUser && (
-                  <div className="flex flex-col items-center mr-3 self-start translate-y-6">
-                    <img
-                      src={`https://avatar.iran.liara.run/public/${idx + 20}`}
-                      className="w-8 h-8 rounded-full shadow-sm"
-                    />
-                    <span className="text-xs text-gray-400 mt-2">
-                      {new Date(msg.timeStamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  className={`p-2 rounded-lg shadow-md mb-4 ${
-                    hasImage ? "max-w-2xl" : "max-w-md"
-                  } ${
-                    msg.sender === currentUser
-                      ? "bg-[#5b6bff] text-white rounded-br-none"
-                      : "bg-white text-gray-900 rounded-bl-none"
-                  }`}
-                >
-                  {/* message text (if content is not the image url itself) */}
-                  {!(hasImage && imageUrl === msg.content) && (
-                    <p className="mb-2">{msg.content}</p>
-                  )}
-
-                  {/* image (rendered below the text) */}
-                  {hasImage && (
-                    <img
-                      src={imageUrl}
-                      alt="sent"
-                      className="mt-3 w-full max-w-xs md:max-w-md lg:max-w-2xl rounded-md object-cover"
-                    />
-                  )}
-                </div>
-
-                {/* outgoing: avatar on right with time below */}
-                {msg.sender === currentUser && (
-                  <div className="flex flex-col items-center ml-3 justify-end translate-y-4 mb-2">
-                    <img
-                      src={`https://avatar.iran.liara.run/public/33`}
-                      className="w-8 h-8 rounded-full shadow-sm"
-                    />
-                    <span className="text-xs text-gray-400 mt-2">
-                      {new Date(msg.timeStamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </span>
-                  </div>
-                )}
+          {Object.entries(groupedMessages).map(([date, msgs]) => (
+            <div key={date}>
+              {/* Date Separator */}
+              <div className="flex justify-center my-6">
+                <span className="bg-gray-200 text-gray-700 text-xs px-4 py-1 rounded-full shadow-sm">
+                  {date}
+                </span>
               </div>
-            );
-          })}
+
+              {/* Messages for this date */}
+              {msgs.map((msg, idx) => {
+                const imageUrl =
+                  msg.image ||
+                  msg.imageUrl ||
+                  (typeof msg.content === "string" &&
+                  /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))|(data:image\/)/i.test(
+                    msg.content
+                  )
+                    ? msg.content
+                    : null);
+                const hasImage = Boolean(imageUrl);
+
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-end ${
+                      msg.sender === currentUser
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    {/* incoming: avatar on left with time below */}
+                    {msg.sender !== currentUser && (
+                      <div className="flex flex-col items-center mr-3 self-start translate-y-6">
+                        <img
+                          src={`https://avatar.iran.liara.run/public/${
+                            idx + 20
+                          }`}
+                          className="w-8 h-8 rounded-full shadow-sm"
+                        />
+                        <span className="text-xs text-gray-400 mt-2">
+                          {new Date(msg.timeStamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`p-2 rounded-lg shadow-md mb-4 ${
+                        hasImage ? "max-w-2xl" : "max-w-md"
+                      } ${
+                        msg.sender === currentUser
+                          ? "bg-[#5b6bff] text-white rounded-br-none"
+                          : "bg-white text-gray-900 rounded-bl-none"
+                      }`}
+                    >
+                      {!(hasImage && imageUrl === msg.content) && (
+                        <p className="mb-2">{msg.content}</p>
+                      )}
+
+                      {hasImage && (
+                        <img
+                          src={imageUrl}
+                          alt="sent"
+                          className="mt-3 w-full max-w-xs md:max-w-md lg:max-w-2xl rounded-md object-cover"
+                        />
+                      )}
+                    </div>
+
+                    {/* outgoing: avatar on right with time below */}
+                    {msg.sender === currentUser && (
+                      <div className="flex flex-col items-center ml-3 justify-end translate-y-4 mb-2">
+                        <img
+                          src={`https://avatar.iran.liara.run/public/33`}
+                          className="w-8 h-8 rounded-full shadow-sm"
+                        />
+                        <span className="text-xs text-gray-400 mt-2">
+                          {new Date(msg.timeStamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
